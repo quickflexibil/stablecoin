@@ -24,14 +24,14 @@ test("ticket minimum never weakens configured cost or peg limits", () => {
 });
 
 test("accepts only loopback browser requests", () => {
-  assert.equal(isLocalRequest({ headers: { host: "127.0.0.1:8811" } }), true);
+  assert.equal(isLocalRequest({ headers: { host: "127.0.0.1:4747" } }), true);
   assert.equal(isLocalRequest({
-    headers: { host: "localhost:8811", origin: "http://localhost:8811" },
+    headers: { host: "localhost:4747", origin: "http://localhost:4747" },
   }), true);
   assert.equal(isLocalRequest({
     headers: { host: "evil.example", origin: "https://evil.example" },
   }), false);
   assert.equal(isLocalRequest({
-    headers: { host: "127.0.0.1:8811", origin: "https://evil.example" },
+    headers: { host: "127.0.0.1:4747", origin: "https://evil.example" },
   }), false);
 });

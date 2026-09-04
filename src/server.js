@@ -16,8 +16,8 @@ import {
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const PUBLIC = join(ROOT, "public");
-const PORT = Number(process.env.ROUTE_GUARD_PORT || 8811);
-const HOST = process.env.ROUTE_GUARD_HOST || "127.0.0.1";
+const PORT = Number(process.env.STABLECOIN_PORT || 4747);
+const HOST = process.env.STABLECOIN_HOST || "127.0.0.1";
 const MAX_BODY = 64 * 1024;
 const TICKET_TTL_MS = 180_000;
 const tickets = new Map();
@@ -254,5 +254,5 @@ export function createAppServer() {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  createAppServer().listen(PORT, HOST, () => console.log(`Stablecoin Route Agent http://${HOST}:${PORT}`));
+  createAppServer().listen(PORT, HOST, () => console.log(`Stablecoin Route Engine http://localhost:${PORT}`));
 }

@@ -32,7 +32,7 @@ npm test
 npm start
 ```
 
-Open `http://127.0.0.1:8811` in a browser.
+Open `http://localhost:4747` in a browser.
 
 Select **Configure API** in the upper-right corner and enter your Binance API key and secret. Restrict the key to trusted IP addresses whenever possible. Credentials are automatically cleared when the server restarts.
 
