@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Binance Agent OS 稳定币最优兑换路径分析与币安闪兑执行工具">
+  <title>稳定币路径引擎</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="稳定币路径引擎首页">
+      <span class="brand-mark">SR</span>
+      <span>稳定币路径引擎</span>
+    </a>
+    <div class="account">
+      <span class="live-dot" id="liveDot"></span>
+      <span id="accountStatus">读取 API 状态</span>
+      <button class="text-button" id="authButton" type="button">配置 API</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="controls">
+      <div class="section-index">02 / 兑换条件</div>
+      <form id="routeForm">
+        <div class="asset-pair">
+          <label>
+            <span>转出资产</span>
+            <select id="fromAsset" name="fromAsset">
+              <option>USDT</option><option>USDC</option><option>FDUSD</option><option>TUSD</option>
+            </select>
+            <small class="balance-readout" id="fromBalance">可用 —</small>
+          </label>
+          <button class="swap-button" id="swapAssets" type="button" aria-label="交换转出和转入资产">⇄</button>
+          <label>
+            <span>转入资产</span>
+            <select id="toAsset" name="toAsset">
+              <option>USDC</option><option>USDT</option><option>FDUSD</option><option>TUSD</option>
+            </select>
+            <small class="balance-readout" id="toBalance">可用 —</small>
+          </label>
+        </div>
+
+        <label class="amount-field">
+          <span>兑换金额</span>
+          <div><input id="amount" name="amount" type="number" min="0.00000001" step="any" value="1000" required><b id="amountAsset">USDT</b></div>
+        </label>
+
+        <div class="policy-grid">
+          <label><span>最大综合成本</span><div><input id="maxCostBps" type="number" min="0" step="0.1" value="20"><b>bps</b></div></label>
+          <label><span>最大偏离</span><div><input id="maxPegBps" type="number" min="0" step="0.1" value="50"><b>bps</b></div></label>
+          <label><span>现货费率</span><div><input id="feeBps" type="number" min="0" step="0.1" value="10"><b>bps</b></div></label>
+        </div>
+
+        <div class="switches">
+          <label class="switch-row">
+            <span>加入币安闪兑</span>
+            <input id="includeConvert" type="checkbox" checked><i></i>
+          </label>
+          <label class="switch-row">
+            <span>允许波动资产中转</span>
+            <input id="allowVolatile" type="checkbox"><i></i>
+          </label>
+        </div>
+
+        <button class="primary-button" id="scanButton" type="submit"><span>扫描最优路径</span><b>→</b></button>
+      </form>
+    </aside>
+
+    <section class="results" aria-live="polite">
+      <div class="result-head">
+        <span class="section-index">01 / 路径比较</span>
+        <span class="timestamp" id="timestamp">尚未扫描</span>
+      </div>
+
+      <div class="recommendation" id="recommendation">
+        <div class="decision ready" id="decision">待机</div>
+        <div class="route-title">
+          <span>推荐路径</span>
+          <h1 id="selectedRoute">—</h1>
+        </div>
+        <div class="output-total">
+          <span>预计到账</span>
+          <strong id="selectedOutput">—</strong>
+          <small id="outputAsset">USDC</small>
+        </div>
+      </div>
+
+      <div class="route-line" id="routeLine" aria-label="推荐兑换步骤">
+        <span class="empty-line">等待实时行情</span>
+      </div>
+
+      <div class="metrics">
+        <div><span>比次优多到账</span><strong id="savedAmount">—</strong></div>
+        <div><span>综合成本</span><strong id="costBps">—</strong></div>
+        <div><span>最大单腿滑点</span><strong id="slippageBps">—</strong></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>排名</th><th>兑换路径</th><th>预计到账</th><th>综合成本</th><th>深度</th><th>规则</th></tr></thead>
+          <tbody id="routeRows"><tr class="empty-row"><td colspan="6">扫描后显示全部可用路径</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="result-foot">
+        <div class="source" id="source">Binance Agent OS</div>
+        <button class="ticket-button" id="ticketButton" type="button" hidden>立即兑换</button>
+      </div>
+      <div class="notice" id="notice" hidden></div>
+    </section>
+  </main>
+
+  <dialog id="apiDialog">
+    <form class="dialog-card" id="apiForm" autocomplete="off">
+      <div class="dialog-head"><span>BINANCE API</span><button id="closeApiButton" type="button" aria-label="关闭">×</button></div>
+      <h2>连接 Binance</h2>
+      <label class="api-field"><span>API Key</span><input id="apiKey" type="password" autocomplete="off" required></label>
+      <label class="api-field"><span>API Secret</span><input id="apiSecret" type="password" autocomplete="new-password" required></label>
+      <button class="execute-button" id="connectApiButton" type="submit">验证并连接</button>
+    </form>
+  </dialog>
+
+  <dialog id="ticketDialog">
+    <form method="dialog" class="dialog-card" id="ticketForm">
+      <div class="dialog-head"><span>币安闪兑</span><button id="closeTicketButton" type="button" aria-label="关闭">×</button></div>
+      <h2>确认闪兑</h2>
+      <dl>
+        <div><dt>支付</dt><dd id="ticketFrom">—</dd></div>
+        <div><dt>最低到账</dt><dd id="ticketMinimum">—</dd></div>
+        <div><dt>票据有效</dt><dd id="ticketExpiry">—</dd></div>
+      </dl>
+      <label class="confirm-field"><span>输入 CONFIRM</span><input id="confirmation" autocomplete="off" spellcheck="false"></label>
+      <button class="execute-button" id="executeButton" type="submit" value="default">确认并兑换</button>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+version: 1
+display_name: Binance Stablecoin Route Agent
+short_description: Finds the best live stablecoin conversion path on Binance.
+default_prompt: Compare the requested stablecoin conversion routes with Binance Agent OS live data. Do not execute unless the selected route passes and the user types exactly CONFIRM.
